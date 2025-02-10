@@ -166,6 +166,10 @@ public class LookupDao<T> implements ShardedDao<T> {
         return Optional.ofNullable(save(entity, t -> t));
     }
 
+    public Optional<T> save(T entity, Supplier<T> filter) throws Exception {
+        return Optional.ofNullable(save(entity, t -> t, filter));
+    }
+
     /**
      * Save an object on the basis of key (value of field annotated with {@link LookupKey}) to target shard
      * and applies the provided function/lambda to it. The return from the handler becomes the return to the get
@@ -180,6 +184,10 @@ public class LookupDao<T> implements ShardedDao<T> {
      */
     public <U> U save(T entity, Function<T, U> handler) throws Exception {
         return delegate.save(dbNamespace, entity, handler);
+    }
+
+    public <U> U save(T entity, Function<T, U> handler, Supplier<T> filter) throws Exception {
+        return delegate.save(dbNamespace, entity, handler, filter);
     }
 
     public Optional<T> createOrUpdate(
