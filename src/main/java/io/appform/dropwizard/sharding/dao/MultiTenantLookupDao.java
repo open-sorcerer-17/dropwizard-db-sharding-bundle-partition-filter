@@ -287,23 +287,6 @@ public class MultiTenantLookupDao<T> implements ShardedDao<T> {
                 .execute(dao.sessionFactory, false, "save", opContext, shardId);
     }
 
-    public <U> U save(String tenantId, T entity, Function<T, U> handler, Supplier<T> filter) throws Exception {
-        Preconditions.checkArgument(daos.containsKey(tenantId), "Unknown tenant: " + tenantId);
-        final String key = keyField.get(entity).toString();
-        int shardId = shardCalculator.shardId(tenantId, key);
-        log.debug("Saving entity of type {} with key {} to shard {}", entityClass.getSimpleName(), key,
-            shardId);
-        LookupDaoPriv dao = daos.get(tenantId).get(shardId);
-        val opContext = Save.<T, U>builder()
-            .saver(dao::save)
-            .entity(entity)
-            .afterSave(handler)
-            .filter(filter)
-            .build();
-        return transactionExecutor.get(tenantId)
-            .execute(dao.sessionFactory, false, "save", opContext, shardId);
-    }
-
     public Optional<T> createOrUpdate(String tenantId,
                                       String id,
                                       UnaryOperator<T> updater,

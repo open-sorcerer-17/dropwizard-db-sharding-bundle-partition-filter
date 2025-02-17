@@ -1,6 +1,5 @@
 package io.appform.dropwizard.sharding.dao.operations;
 
-import java.util.function.Supplier;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
@@ -26,7 +25,6 @@ public class Save<T, R> extends OpContext<R> {
   private UnaryOperator<T> saver;
   @Builder.Default
   private Function<T, R> afterSave = t -> (R) t;
-  private Supplier<T> filter;
 
   @Override
   public R apply(Session session) {

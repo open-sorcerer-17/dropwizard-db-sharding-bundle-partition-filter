@@ -6,7 +6,7 @@ import io.appform.dropwizard.sharding.DBShardingBundleBase;
 import io.appform.dropwizard.sharding.config.ShardedHibernateFactory;
 import io.appform.dropwizard.sharding.execution.TransactionExecutionContext;
 import io.appform.dropwizard.sharding.filters.TransactionFilter;
-import io.appform.dropwizard.sharding.filters.TransactionFilterResult;
+import io.appform.dropwizard.sharding.filters.FilterResult;
 import lombok.SneakyThrows;
 import lombok.val;
 import org.junit.jupiter.api.Test;
@@ -20,8 +20,8 @@ public class FilterAllowTest extends BundleBasedTestBase {
     private static final class AllowingFilter implements TransactionFilter {
 
         @Override
-        public TransactionFilterResult evaluate(TransactionExecutionContext context) {
-            return TransactionFilterResult.allow();
+        public FilterResult evaluate(TransactionExecutionContext context) {
+            return FilterResult.allow();
         }
     }
 

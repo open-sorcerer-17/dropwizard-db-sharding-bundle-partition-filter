@@ -1,5 +1,6 @@
 package io.appform.dropwizard.sharding.dao.operations;
 
+import io.appform.dropwizard.sharding.evaluators.EntityValidator;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
@@ -26,11 +27,13 @@ public class GetAndUpdate<T> extends OpContext<Boolean> {
   @Builder.Default
   private Function<T, T> mutator = t->t;
   private BiConsumer<T, T> updater;
+  private EntityValidator entityValidator;
 
   @Override
   public Boolean apply(Session session) {
     T entity = getter.apply(criteria);
-    if (null == entity) {
+    //todo: error throw here
+    if (null == entity || !entityValidator.isValid(this, entity)) {
       return false;
     }
     T newEntity = mutator.apply(entity);

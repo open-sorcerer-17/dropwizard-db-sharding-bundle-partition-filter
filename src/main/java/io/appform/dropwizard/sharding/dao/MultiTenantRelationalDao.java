@@ -42,6 +42,7 @@ import io.appform.dropwizard.sharding.dao.operations.UpdateWithScroll;
 import io.appform.dropwizard.sharding.dao.operations.relationaldao.CreateOrUpdate;
 import io.appform.dropwizard.sharding.dao.operations.relationaldao.CreateOrUpdateInLockedContext;
 import io.appform.dropwizard.sharding.dao.operations.relationaldao.readonlycontext.ReadOnlyForRelationalDao;
+import io.appform.dropwizard.sharding.evaluators.EntityValidator;
 import io.appform.dropwizard.sharding.execution.DaoType;
 import io.appform.dropwizard.sharding.execution.TransactionExecutionContext;
 import io.appform.dropwizard.sharding.execution.TransactionExecutor;
@@ -276,6 +277,7 @@ public class MultiTenantRelationalDao<T> implements ShardedDao<T> {
     private final Map<String, TransactionExecutor> transactionExecutor = Maps.newHashMap();
     private final Map<String, ShardInfoProvider> shardInfoProviders;
     private final TransactionObserver observer;
+    private final EntityValidator entityValidator;
 
     /**
      * Constructs a RelationalDao instance for managing entities across multiple shards. This
@@ -296,23 +298,58 @@ public class MultiTenantRelationalDao<T> implements ShardedDao<T> {
      *                                  as @Id, if the designated key field is not accessible, or if
      *                                  it is not of type String.
      */
+//    public MultiTenantRelationalDao(
+//            Map<String, List<SessionFactory>> sessionFactories,
+//            Class<T> entityClass,
+//            ShardCalculator<String> shardCalculator,
+//            Map<String, ShardingBundleOptions> shardingOptions,
+//            final Map<String, ShardInfoProvider> shardInfoProviders,
+//            final TransactionObserver observer) {
+//        this.shardCalculator = shardCalculator;
+//        this.shardingOptions = shardingOptions;
+//        sessionFactories.forEach((tenantId, factories) -> daos.put(tenantId,
+//                factories.stream().map(RelationalDaoPriv::new).collect(Collectors.toList())));
+//        this.entityClass = entityClass;
+//        this.shardInfoProviders = shardInfoProviders;
+//        this.observer = observer;
+//        shardInfoProviders.forEach((tenantId, shardInfoProvider) -> {
+//            this.transactionExecutor.put(tenantId,
+//                    new TransactionExecutor(shardInfoProvider, DaoType.RELATIONAL, entityClass, observer));
+//        });
+//        Field[] fields = FieldUtils.getFieldsWithAnnotation(entityClass, Id.class);
+//        Preconditions.checkArgument(fields.length != 0, "A field needs to be designated as @Id");
+//        Preconditions.checkArgument(fields.length == 1, "Only one field can be designated as @Id");
+//        keyField = fields[0];
+//        if (!keyField.isAccessible()) {
+//            try {
+//                keyField.setAccessible(true);
+//            } catch (SecurityException e) {
+//                log.error(
+//                        "Error making key field accessible please use a public method and mark that as @Id", e);
+//                throw new IllegalArgumentException("Invalid class, DAO cannot be created.", e);
+//            }
+//        }
+//    }
+
     public MultiTenantRelationalDao(
-            Map<String, List<SessionFactory>> sessionFactories,
-            Class<T> entityClass,
-            ShardCalculator<String> shardCalculator,
-            Map<String, ShardingBundleOptions> shardingOptions,
-            final Map<String, ShardInfoProvider> shardInfoProviders,
-            final TransactionObserver observer) {
+        Map<String, List<SessionFactory>> sessionFactories,
+        Class<T> entityClass,
+        ShardCalculator<String> shardCalculator,
+        Map<String, ShardingBundleOptions> shardingOptions,
+        final Map<String, ShardInfoProvider> shardInfoProviders,
+        final TransactionObserver observer,
+        final EntityValidator entityValidator) {
+        this.entityValidator = entityValidator;
         this.shardCalculator = shardCalculator;
         this.shardingOptions = shardingOptions;
         sessionFactories.forEach((tenantId, factories) -> daos.put(tenantId,
-                factories.stream().map(RelationalDaoPriv::new).collect(Collectors.toList())));
+            factories.stream().map(RelationalDaoPriv::new).collect(Collectors.toList())));
         this.entityClass = entityClass;
         this.shardInfoProviders = shardInfoProviders;
         this.observer = observer;
         shardInfoProviders.forEach((tenantId, shardInfoProvider) -> {
             this.transactionExecutor.put(tenantId,
-                    new TransactionExecutor(shardInfoProvider, DaoType.RELATIONAL, entityClass, observer));
+                new TransactionExecutor(shardInfoProvider, DaoType.RELATIONAL, entityClass, observer));
         });
         Field[] fields = FieldUtils.getFieldsWithAnnotation(entityClass, Id.class);
         Preconditions.checkArgument(fields.length != 0, "A field needs to be designated as @Id");
@@ -323,7 +360,7 @@ public class MultiTenantRelationalDao<T> implements ShardedDao<T> {
                 keyField.setAccessible(true);
             } catch (SecurityException e) {
                 log.error(
-                        "Error making key field accessible please use a public method and mark that as @Id", e);
+                    "Error making key field accessible please use a public method and mark that as @Id", e);
                 throw new IllegalArgumentException("Invalid class, DAO cannot be created.", e);
             }
         }
@@ -867,6 +904,7 @@ public class MultiTenantRelationalDao<T> implements ShardedDao<T> {
                 .criteria(dao.getDetachedCriteria(id))
                 .getter(dao::get)
                 .mutator(updater)
+                .entityValidator(entityValidator)
                 .updater(dao::update).build();
         try {
             return transactionExecutor.get(tenantId).execute(daoSessionFactory, true, "update",

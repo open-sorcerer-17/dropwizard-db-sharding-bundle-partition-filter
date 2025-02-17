@@ -5,6 +5,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import io.appform.dropwizard.sharding.config.MetricConfig;
 import io.appform.dropwizard.sharding.config.ShardingBundleOptions;
+import io.appform.dropwizard.sharding.filters.EntityValidator;
 import io.appform.dropwizard.sharding.filters.TransactionFilter;
 import io.appform.dropwizard.sharding.listeners.TransactionListener;
 import io.appform.dropwizard.sharding.metrics.TransactionMetricManager;
@@ -37,8 +38,11 @@ public abstract class BundleCommonBase<T extends Configuration> implements Confi
 
   protected final List<TransactionListener> listeners = new ArrayList<>();
   protected final List<TransactionFilter> filters = new ArrayList<>();
+  protected final List<EntityValidator> entityValidators = new ArrayList<>();
 
   protected final List<TransactionObserver> observers = new ArrayList<>();
+
+  protected final io.appform.dropwizard.sharding.evaluators.EntityValidator evaluator = new io.appform.dropwizard.sharding.evaluators.EntityValidator();
 
   protected final List<Class<?>> initialisedEntities;
 
@@ -59,6 +63,10 @@ public abstract class BundleCommonBase<T extends Configuration> implements Confi
 
   protected ShardBlacklistingStore getBlacklistingStore() {
     return new InMemoryLocalShardBlacklistingStore();
+  }
+
+  public void setupEvaluators() {
+    evaluator.addFilters(entityValidators);
   }
 
   public void setupObservers(final MetricConfig metricConfig,
