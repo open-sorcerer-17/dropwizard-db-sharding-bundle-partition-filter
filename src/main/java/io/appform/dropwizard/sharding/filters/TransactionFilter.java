@@ -7,5 +7,5 @@ import io.appform.dropwizard.sharding.execution.TransactionExecutionContext;
  */
 public interface TransactionFilter {
 
-    TransactionFilterResult evaluate(final TransactionExecutionContext context);
+    FilterResult evaluate(final TransactionExecutionContext context);
 }

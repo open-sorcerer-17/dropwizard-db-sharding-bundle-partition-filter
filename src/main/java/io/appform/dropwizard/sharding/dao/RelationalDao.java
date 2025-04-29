@@ -100,13 +100,15 @@ public class RelationalDao<T> implements ShardedDao<T> {
             final ShardInfoProvider shardInfoProvider,
             final TransactionObserver observer) {
         this.tenantId = DBShardingBundleBase.DEFAULT_NAMESPACE;
+        //todo:null here
         this.delegate = new MultiTenantRelationalDao<>(
                 Map.of(tenantId, sessionFactories),
                 entityClass,
                 shardCalculator,
                 Map.of(tenantId, shardingOptions),
                 Map.of(tenantId, shardInfoProvider),
-                observer
+                observer,
+                null
         );
     }
 

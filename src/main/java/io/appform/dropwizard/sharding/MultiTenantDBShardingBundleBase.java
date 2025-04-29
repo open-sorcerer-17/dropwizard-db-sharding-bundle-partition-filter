@@ -154,6 +154,7 @@ public abstract class MultiTenantDBShardingBundleBase<T extends Configuration> e
       this.shardingOptions.put(tenantId, shardingOption);
       healthCheckManager.manageHealthChecks(shardConfig.getBlacklist(), environment);
       setupObservers(shardConfig.getMetricConfig(), environment.metrics());
+      setupEvaluators();
       environment.admin().addTask(new BlacklistShardTask(tenantId, shardManager));
       environment.admin().addTask(new UnblacklistShardTask(tenantId, shardManager));
     });
@@ -258,7 +259,8 @@ public abstract class MultiTenantDBShardingBundleBase<T extends Configuration> e
             new ConsistentHashBucketIdExtractor<>(this.shardManagers)),
         this.shardingOptions,
         shardInfoProviders,
-        rootObserver);
+        rootObserver,
+        evaluator);
   }
 
 
@@ -283,7 +285,8 @@ public abstract class MultiTenantDBShardingBundleBase<T extends Configuration> e
         new ShardCalculator<>(this.shardManagers, bucketIdExtractor),
         this.shardingOptions,
         shardInfoProviders,
-        rootObserver);
+        rootObserver,
+        evaluator);
   }
 
   public <EntityType, T extends Configuration>

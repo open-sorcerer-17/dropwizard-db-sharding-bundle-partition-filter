@@ -123,13 +123,15 @@ public class MultiTenantLookupDaoTest {
     phoneDao = new MultiTenantLookupDao<>(sessionFactories, Phone.class, shardCalculator,
         shardingOptions,
         shardInfoProvider, observer);
+    //todo: null here
     transactionDao = new MultiTenantRelationalDao<>(sessionFactories, Transaction.class,
         shardCalculator,
         shardingOptions,
-        shardInfoProvider, observer);
+        shardInfoProvider, observer, null);
+    //todo: null here
     auditDao = new MultiTenantRelationalDao<>(sessionFactories, Audit.class, shardCalculator,
         shardingOptions,
-        shardInfoProvider, observer);
+        shardInfoProvider, observer, null);
   }
 
   @AfterEach

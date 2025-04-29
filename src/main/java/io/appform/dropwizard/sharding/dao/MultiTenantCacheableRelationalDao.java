@@ -66,8 +66,9 @@ public class MultiTenantCacheableRelationalDao<T> extends MultiTenantRelationalD
       Map<String, ShardingBundleOptions> shardingOptions,
       Map<String, ShardInfoProvider> shardInfoProvider,
       TransactionObserver observer) {
+    //todo:null
     super(sessionFactories, entityClass, shardCalculator, shardingOptions, shardInfoProvider,
-        observer);
+        observer, null);
     this.cache = cache;
   }
 

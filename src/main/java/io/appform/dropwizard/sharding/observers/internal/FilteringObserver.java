@@ -4,7 +4,7 @@ import io.appform.dropwizard.sharding.exceptions.TransactionFilteredException;
 import io.appform.dropwizard.sharding.execution.TransactionExecutionContext;
 import io.appform.dropwizard.sharding.filters.FilterOutput;
 import io.appform.dropwizard.sharding.filters.TransactionFilter;
-import io.appform.dropwizard.sharding.filters.TransactionFilterResult;
+import io.appform.dropwizard.sharding.filters.FilterResult;
 import io.appform.dropwizard.sharding.observers.TransactionObserver;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -44,11 +44,11 @@ public final class FilteringObserver extends TransactionObserver {
                         return filter.evaluate(context);
                     } catch (Throwable t) {
                         log.error("Error running filter: " + filter.getClass(), t);
-                        return TransactionFilterResult.allow();
+                        return FilterResult.allow();
                     }
                 })
                 .filter(result -> FilterOutput.BLOCK.equals(result.getOutput()))
-                .map(TransactionFilterResult::getReason)
+                .map(FilterResult::getReason)
                 .collect(Collectors.toList());
         if (blocks.isEmpty()) {
             return proceed(context, supplier);

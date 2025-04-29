@@ -6,7 +6,7 @@ import io.appform.dropwizard.sharding.DBShardingBundleBase;
 import io.appform.dropwizard.sharding.config.ShardedHibernateFactory;
 import io.appform.dropwizard.sharding.execution.TransactionExecutionContext;
 import io.appform.dropwizard.sharding.filters.TransactionFilter;
-import io.appform.dropwizard.sharding.filters.TransactionFilterResult;
+import io.appform.dropwizard.sharding.filters.FilterResult;
 import lombok.SneakyThrows;
 import lombok.val;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,7 @@ public class FilterErrorTest extends BundleBasedTestBase {
     private static final class ThrowingFilter implements TransactionFilter {
 
         @Override
-        public TransactionFilterResult evaluate(TransactionExecutionContext context) {
+        public FilterResult evaluate(TransactionExecutionContext context) {
             throw new RuntimeException("Forced exception from filter");
         }
     }
